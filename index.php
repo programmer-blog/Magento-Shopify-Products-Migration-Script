@@ -1,4 +1,5 @@
 <?php
+  error_reporting(~E_ALL);
   require_once('src/config.php');
   require_once('vendor/autoload.php');
   use \App\
@@ -12,7 +13,8 @@
       MAGENTO_PRODUCTS_URL, 
       MAGENTO_TOKEN_URL, 
       MAGENTO_ADMIN_USERNAME, 
-      MAGENTO_ADMIN_PASSWORD
+      MAGENTO_ADMIN_PASSWORD,
+      MAGENTO_PRODUCT_IMAGE_URL
     );
 
   $addProducts = new AddToShopify(
@@ -26,3 +28,11 @@
 
   $products = $productObj->processResults();
   $results = $addProducts->add_product($products);
+
+  $output = "<h2>Products Inserted to Shopify from Magento</h2><br /><br />";
+  foreach($results as $result) {
+    $productInfo = json_decode($result->getBody()->getContents());
+    $output .= 'Product ID: <strong>'.$productInfo->product->id.'</strong> Title: <strong>'.$productInfo->product->title.'</strong> <br />';
+  }
+
+  echo $output;

@@ -6,14 +6,16 @@
     private $base_url;
     private $login_endpoint;
     private $products_endpoint;
+    private $image_endpoint;
     private $username;
     private $password;
 
-    public function __construct($base_url, $products, $login, $username, $password)
+    public function __construct($base_url, $products, $login, $username, $password, $image_endpoint)
     {
       $this->base_url = $base_url;
       $this->login_endpoint = $login;
       $this->products_endpoint = $products;
+      $this->image_endpoint = $image_endpoint;
       $this->username = $username;
       $this->password = $password;
       $this->client = $this->get_token();
@@ -69,6 +71,25 @@
           if(isset($product->name)){
             $data['product']['title'] = $product->name;
             $data['product']['body_html'] = $product->custom_attributes[16]->value;
+            $data['product']['variants'][] = array(
+                  'option1'=> 'Primary',
+                  'sku'=> $product->sku,
+                  'price' => $product->price
+                ); 
+
+            if(count($product->media_gallery_entries) && isset($product->media_gallery_entries[0])){
+               $image = $product->media_gallery_entries[0];
+               if($image->media_type == 'image') {
+                  $imagedata = file_get_contents($this->base_url.$this->image_endpoint.$image->file);
+                  $base64OfImage = base64_encode($imagedata);
+                  $data['product']["images"] = 
+                  array(
+                    array(
+                        "attachment" => $base64OfImage
+                    )
+                  );
+               }
+            }
             array_push($results, $data);
           }
         }
