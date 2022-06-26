@@ -4,6 +4,7 @@
   define("SHOPIFY_BASE_URL", "tweb-store.myshopify.com");
   define("SHOPIFY_API_ENDPOINT_V", "/admin/api/2022-04/");
   define("SHOPIFY_API_PRODUCTS", "products.json");
+  define("SHOPIFY_API_METAFIELDS", "products/{{product_id}}/metafields.json");
   define("HTTPS", "https://");
 
   define("MAGENTO_BASE_URL", "http://52.204.57.245/");

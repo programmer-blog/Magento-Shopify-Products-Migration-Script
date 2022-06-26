@@ -23,15 +23,15 @@
     SHOPIFY_API_PRODUCTS,
     SHOPIFY_API_KEY,
     SHOPIFY_API_SECRET,
-    HTTPS
+    HTTPS,
+    SHOPIFY_API_METAFIELDS
   );
 
   $products = $productObj->processResults();
   $results = $addProducts->add_product($products);
 
-  $output = "<h2>Products Inserted to Shopify from Magento</h2><br /><br />";
-  foreach($results as $result) {
-    $productInfo = json_decode($result->getBody()->getContents());
+  $output = "<h2>Products Inserted / Updated - Shopify Store</h2><br /><br />";
+  foreach($results as $productInfo) {
     $output .= 'Product ID: <strong>'.$productInfo->product->id.'</strong> Title: <strong>'.$productInfo->product->title.'</strong> <br />';
   }
 

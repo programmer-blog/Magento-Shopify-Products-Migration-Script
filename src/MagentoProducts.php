@@ -62,38 +62,41 @@
      * Process results according to shopify store 
      */
     public function processResults() {
-      $productsArr = json_decode($this->get_products());
-      $results = [];
-
-      foreach($productsArr as $products) {
-        foreach($products as $product) {
-          $data = [];
-          if(isset($product->name)){
-            $data['product']['title'] = $product->name;
-            $data['product']['body_html'] = $product->custom_attributes[16]->value;
-            $data['product']['variants'][] = array(
-                  'option1'=> 'Primary',
-                  'sku'=> $product->sku,
-                  'price' => $product->price
-                ); 
-
-            if(count($product->media_gallery_entries) && isset($product->media_gallery_entries[0])){
-               $image = $product->media_gallery_entries[0];
-               if($image->media_type == 'image') {
-                  $imagedata = file_get_contents($this->base_url.$this->image_endpoint.$image->file);
-                  $base64OfImage = base64_encode($imagedata);
-                  $data['product']["images"] = 
+      $storeProducts = json_decode($this->get_products());
+      $response = [];
+      $results = $storeProducts->items;
+      foreach($results as $product) {
+        $data = [];
+        if(isset($product->name)) {
+          $data['product']['title'] = $product->name;
+          $data['product']['body_html'] = $product->custom_attributes[16]->value;
+          $data['product']['variants'][] = array(
+                'option1'=> 'Primary',
+                'sku'=> $product->sku,
+                'price' => $product->price
+              ); 
+          $data['product']['id'] = $product->id;
+          $data['product']['updated_at'] = date("Y-m-d", strtotime($product->updated_at));
+          /**
+           * This code is memory intensive because a product image from megneto is copied and
+           * Converted to base64 encoding and saved to Shopify database
+           */
+          if(count($product->media_gallery_entries) && isset($product->media_gallery_entries[0])){
+              $image = $product->media_gallery_entries[0];
+              if($image->media_type == 'image') {
+                $imagedata = file_get_contents($this->base_url.$this->image_endpoint.$image->file);
+                $base64OfImage = base64_encode($imagedata);
+                $data['product']["images"] = 
+                array(
                   array(
-                    array(
-                        "attachment" => $base64OfImage
-                    )
-                  );
-               }
+                      "attachment" => $base64OfImage
+                  )
+                );
+              }
             }
-            array_push($results, $data);
+            array_push($response, $data);
           }
         }
+        return $response;
       }
-      return $results;
     }
-  }
